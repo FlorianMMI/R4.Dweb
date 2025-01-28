@@ -39,7 +39,7 @@ const material = new THREE.MeshPhysicalMaterial({
    clearCoat: 0.5,
    clearCoatRoughness: 0.5,
    lights: true,
-   flatShading : false,
+   flatShading : true,
  });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
@@ -54,7 +54,7 @@ scene.add(aLight);
 
 
 // Camera
-const camera = new THREE.PerspectiveCamera(45, 800 / 600);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
 camera.position.z = 20;
 scene.add(camera);
 
@@ -62,5 +62,27 @@ scene.add(camera);
 // Renderer
 const canvas = document.querySelector(".webgl");
 const renderer = new THREE.WebGLRenderer({ canvas });
-renderer.setSize(800, 600);
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.render(scene, camera);
+});
+
+let angleLight = 0;
+
+const loop = () => {
+
+  //mesh.rotateX(-0.06);
+  light.position.x = 10 * Math.cos(angleLight);
+  light.position.z = 10 * Math.sin(angleLight);
+  angleLight += 0.01;
+  renderer.render(scene, camera);
+  window.requestAnimationFrame(loop);
+  
+}
+
+loop();
