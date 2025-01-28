@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+import * as THREE from 'three';2
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 // Scene
@@ -12,7 +13,7 @@ const scene = new THREE.Scene();
 //5. Du plus rapide au plus lent dans l'ordre : BasicMaterial, LambertMaterial, PhongMaterial, StandardMaterial, PhysicalMaterial
 //  => important quand on a beaucoup d'objets et de lumière à afficher
 // => en pratique on dépasse rarement 5 lumières 
-const geometry = new THREE.SphereGeometry(4, 32, 32);
+const geometry = new THREE.RingGeometry(10, 10, 10, 2, 2, 2);
 // const material = new THREE.MeshLambertMaterial({
 //    color: 0xff0000,
 //    emissive: 0x000000,
@@ -39,7 +40,7 @@ const material = new THREE.MeshPhysicalMaterial({
    clearCoat: 0.5,
    clearCoatRoughness: 0.5,
    lights: true,
-   flatShading : true,
+   flatShading : false,
  });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
@@ -65,6 +66,12 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
 
+// Aide 
+
+scene.add(new THREE.AxesHelper(10));
+scene.add(new THREE.GridHelper(10, 15));
+scene.add(new THREE.PointLightHelper(light));
+
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -74,13 +81,17 @@ window.addEventListener('resize', () => {
 
 let angleLight = 0;
 
+const controls = new OrbitControls(camera, canvas);
+
+controls.enableDamping = true;
+
 const loop = () => {
 
-  //mesh.rotateX(-0.06);
   light.position.x = 10 * Math.cos(angleLight);
   light.position.z = 10 * Math.sin(angleLight);
   angleLight += 0.01;
-  renderer.render(scene, camera);
+  controls.update();
+  renderer.render( scene, camera );
   window.requestAnimationFrame(loop);
   
 }
