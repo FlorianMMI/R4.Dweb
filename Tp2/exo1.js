@@ -1,66 +1,79 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-
-// Scene
-// 1. Racine, va contenir tous les objets de la scène, les lumières, les ou la caméras 
 const scene = new THREE.Scene();
 
+let objects = [];
 
-// Sphere
-// 2. Création d'une sphère avec un rayon de 3, 16 segments de subdivisions
-// 3. Affichage du wireframe de la frame de la sphère
-//5. Du plus rapide au plus lent dans l'ordre : BasicMaterial, LambertMaterial, PhongMaterial, StandardMaterial, PhysicalMaterial
-//  => important quand on a beaucoup d'objets et de lumière à afficher
-// => en pratique on dépasse rarement 5 lumières 
-const geometry = new THREE.SphereGeometry(4, 32, 32);
-// const material = new THREE.MeshLambertMaterial({
-//    color: 0xff0000,
-//    emissive: 0x000000,
-//    emissiveIntensity: 1,
-//    lights: true
-// });
-// const material = new THREE.MeshPhongMaterial({
-//    color: 0xff0000,
-//    specular: 0xffffff,
-//    shininess: 200,
-//    lights: true
-//  });
-// const material = new THREE.MeshStandardMaterial({
-//    color: 0xff0000,
-//    roughness: 0.55,
-//    metalness: 0.2,
-//    lights: true
-//  });
-const material = new THREE.MeshPhysicalMaterial({
-   color: 0xffffff,
-   roughness: 0.5,
-   metalness: 0.5,
-   reflectivity: 0.5,
-   clearCoat: 0.5,
-   clearCoatRoughness: 0.5,
-   lights: true,
-   flatShading : false,
- });
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+const solarSystem = new THREE.Object3D();
+scene.add(solarSystem);
+objects.push(solarSystem);
 
 
-// Light
-const light = new THREE.PointLight(0xffffff, 1, 100);
-light.position.set(30, 10, 10);
+
+const Spheregeometry = new THREE.SphereGeometry(1, 6, 6);
+const Sunmaterial = new THREE.MeshPhongMaterial({
+  emissive: 0xFFFF00
+});
+
+const sunMesh = new THREE.Mesh(Spheregeometry, Sunmaterial);
+sunMesh.scale.set(5,5,5)
+solarSystem.add(sunMesh);
+objects.push(sunMesh);
+
+
+const eathMaterial = new THREE.MeshPhongMaterial({color: 0x2233FF, emissive: 0x112244})
+const earthMesh = new THREE.Mesh(Spheregeometry, eathMaterial);
+
+earthMesh.position.x = 10;
+solarSystem.add(earthMesh);
+objects.push(earthMesh);
+
+
+
+
+
+
+const light = new THREE.PointLight(0xffffff, 3);
+// light.position.set(10, 10, 10);
 scene.add(light);
-const aLight = new THREE.AmbientLight(0x151515);
-scene.add(aLight);
+// 
 
-
-// Camera
-const camera = new THREE.PerspectiveCamera(45, 800 / 600);
-camera.position.z = 20;
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
+camera.position.set(0, 50, 0);
+camera.up.set(0, 0, 1);
+camera.lookAt(0, 0, 0);
 scene.add(camera);
 
-
-// Renderer
 const canvas = document.querySelector(".webgl");
 const renderer = new THREE.WebGLRenderer({ canvas });
-renderer.setSize(800, 600);
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
+
+// scene.add(new THREE.AxesHelper(10));
+scene.add(new THREE.GridHelper(10, 15));
+// scene.add(new THREE.SpotLightHelper(light));
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.render(scene, camera);
+});
+
+let angleLight = 0;
+
+const controls = new OrbitControls(camera, canvas);
+
+controls.enableDamping = true;
+
+const loop = () => {
+  objects.forEach((obj) => {
+    obj.rotation.y += 0.01;
+  });
+  controls.update();
+  renderer.render(scene, camera);
+  window.requestAnimationFrame(loop);
+}
+
+loop();
