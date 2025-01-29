@@ -16,13 +16,21 @@ gui.add (document, "title");
 let time = 0.01;
 
 let obj = {
+  soleil: true,
+  terre: true,
+  lune: true,
+  grille: true,
   Vitesse: 0.01,
-
 };
 
 gui.add(obj, "Vitesse", 0, 0.2, 0.001).onChange((value) => {
   time = value;
 });
+
+gui.add(obj, "soleil")
+gui.add(obj, "terre")
+gui.add(obj, "lune")
+gui.add(obj, "grille")
 
 
 
@@ -89,7 +97,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
 
 // scene.add(new THREE.AxesHelper(10));
-scene.add(new THREE.GridHelper(25,25));
+const gridHelper = new THREE.GridHelper(25, 25);
+scene.add(gridHelper);
 // scene.add(new THREE.SpotLightHelper(light));
 
 window.addEventListener('resize', () => {
@@ -106,7 +115,10 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 // let time = 0.01;
 const loop = () => {
-  
+  sunMesh.visible = obj.soleil;
+  earthMesh.visible = obj.terre;
+  moonMesh.visible = obj.lune;
+  gridHelper.visible = obj.grille;
   objects.forEach((obj) => {
     obj.rotation.y += time;
   });
