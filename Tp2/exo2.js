@@ -1,7 +1,30 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm';
+import Stats from 'three/addons/libs/stats.module.js';
+
+const container = document.querySelector('.container');
+const stats = new Stats();
+container.appendChild(stats.dom);
+
 
 const scene = new THREE.Scene();
+
+const gui = new GUI();
+gui.add (document, "title");
+
+let time = 0.01;
+
+let obj = {
+  Vitesse: 0.01,
+
+};
+
+gui.add(obj, "Vitesse", 0, 0.2, 0.001).onChange((value) => {
+  time = value;
+});
+
+
 
 let objects = [];
 
@@ -66,7 +89,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.render(scene, camera);
 
 // scene.add(new THREE.AxesHelper(10));
-scene.add(new THREE.GridHelper(10, 15));
+scene.add(new THREE.GridHelper(25,25));
 // scene.add(new THREE.SpotLightHelper(light));
 
 window.addEventListener('resize', () => {
@@ -76,12 +99,12 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-let angleLight = 0;
+
 
 const controls = new OrbitControls(camera, canvas);
 
 controls.enableDamping = true;
-let time = 0.01;
+// let time = 0.01;
 const loop = () => {
   
   objects.forEach((obj) => {
@@ -90,6 +113,8 @@ const loop = () => {
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(loop);
+  stats.update();
 }
+
 
 loop();
