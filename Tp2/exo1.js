@@ -1,5 +1,4 @@
-import * as THREE from 'three';2
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'three';
 
 
 // Scene
@@ -13,7 +12,7 @@ const scene = new THREE.Scene();
 //5. Du plus rapide au plus lent dans l'ordre : BasicMaterial, LambertMaterial, PhongMaterial, StandardMaterial, PhysicalMaterial
 //  => important quand on a beaucoup d'objets et de lumière à afficher
 // => en pratique on dépasse rarement 5 lumières 
-const geometry = new THREE.TorusGeometry(1, 0.5, 8);
+const geometry = new THREE.SphereGeometry(4, 32, 32);
 // const material = new THREE.MeshLambertMaterial({
 //    color: 0xff0000,
 //    emissive: 0x000000,
@@ -43,21 +42,19 @@ const material = new THREE.MeshPhysicalMaterial({
    flatShading : false,
  });
 const mesh = new THREE.Mesh(geometry, material);
-mesh.rotateX(Math.PI / 2);
 scene.add(mesh);
 
 
 // Light
-// const light = new THREE.DirectionalLight(0xffffff, 1);
-const light = new THREE.SpotLight(0xffffff, 1);
-light.position.set(10, 10, 10);
+const light = new THREE.PointLight(0xffffff, 1, 100);
+light.position.set(30, 10, 10);
 scene.add(light);
 const aLight = new THREE.AmbientLight(0x151515);
 scene.add(aLight);
 
 
 // Camera
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
+const camera = new THREE.PerspectiveCamera(45, 800 / 600);
 camera.position.z = 20;
 scene.add(camera);
 
@@ -65,39 +62,5 @@ scene.add(camera);
 // Renderer
 const canvas = document.querySelector(".webgl");
 const renderer = new THREE.WebGLRenderer({ canvas });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(800, 600);
 renderer.render(scene, camera);
-
-// Aide 
-
-scene.add(new THREE.AxesHelper(10));
-scene.add(new THREE.GridHelper(10, 15));
-scene.add(new THREE.SpotLightHelper(light));
-// scene.add(new THREE.DirectionalLightHelper(light));
-// scene.add(new THREE.PointLightHelper(light));
-
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.render(scene, camera);
-});
-
-let angleLight = 0;
-
-const controls = new OrbitControls(camera, canvas);
-
-controls.enableDamping = true;
-
-const loop = () => {
-
-  // light.position.x = 10 * Math.cos(angleLight);
-  // light.position.z = 10 * Math.sin(angleLight);
-  // angleLight += 0.01;
-  controls.update();
-  renderer.render( scene, camera );
-  window.requestAnimationFrame(loop);
-  
-}
-
-loop();

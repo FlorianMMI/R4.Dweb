@@ -13,7 +13,7 @@ const scene = new THREE.Scene();
 //5. Du plus rapide au plus lent dans l'ordre : BasicMaterial, LambertMaterial, PhongMaterial, StandardMaterial, PhysicalMaterial
 //  => important quand on a beaucoup d'objets et de lumière à afficher
 // => en pratique on dépasse rarement 5 lumières 
-const geometry = new THREE.TorusGeometry(1, 0.5, 8);
+const geometry = new THREE.SphereGeometry(3, 16, 16);
 // const material = new THREE.MeshLambertMaterial({
 //    color: 0xff0000,
 //    emissive: 0x000000,
@@ -26,22 +26,22 @@ const geometry = new THREE.TorusGeometry(1, 0.5, 8);
 //    shininess: 200,
 //    lights: true
 //  });
-// const material = new THREE.MeshStandardMaterial({
-//    color: 0xff0000,
-//    roughness: 0.55,
-//    metalness: 0.2,
-//    lights: true
-//  });
-const material = new THREE.MeshPhysicalMaterial({
-   color: 0xffffff,
-   roughness: 0.5,
-   metalness: 0.5,
-   reflectivity: 0.5,
-   clearCoat: 0.5,
-   clearCoatRoughness: 0.5,
-   lights: true,
-   flatShading : false,
+const material = new THREE.MeshStandardMaterial({
+   color: 0xff0000,
+   roughness: 0.55,
+   metalness: 0.2,
+   transparent: true,
  });
+// const material = new THREE.MeshPhysicalMaterial({
+//    color: 0xffffff,
+//    roughness: 0.5,
+//    metalness: 0.5,
+//    reflectivity: 0.5,
+//    clearCoat: 0.5,
+//    clearCoatRoughness: 0.5,
+//    lights: true,
+//    flatShading : false,
+//  });
 const mesh = new THREE.Mesh(geometry, material);
 mesh.rotateX(Math.PI / 2);
 scene.add(mesh);
@@ -83,7 +83,7 @@ window.addEventListener('resize', () => {
   renderer.render(scene, camera);
 });
 
-let angleLight = 0;
+// let angleLight = 0;
 
 const controls = new OrbitControls(camera, canvas);
 
@@ -100,4 +100,20 @@ const loop = () => {
   
 }
 
+
+
 loop();
+
+
+
+gsap.fromTo(mesh.material, {opacity: 0}, {opacity: 1, duration: 5});
+
+
+window.addEventListener('mousedown', (event) => {
+  gsap.to(mesh.material.color, { r: event.pageX / window.innerWidth, g: event.pageY / window.innerHeight, b: 1});
+
+});
+
+
+
+gsap.fromTo(mesh.scale, {x: 0, y: 0, z: 0}, {x: 1, y: 1, z: 1, duration: 5, ease: "elastic"});
