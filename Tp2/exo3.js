@@ -95,12 +95,17 @@ const moonOrbit = new THREE.Object3D();
 moonOrbit.position.x = 2;
 earthOrbit.add(moonOrbit);
 
+
+const moonColor = "./asset/2k_moon.jpg";
+const moonBump = "./asset/2k_moon_bump.jpg";
+// const moonSpec = "./asset/2k_moon_spec.jpg";
+
 const moonMaterial = new THREE.MeshPhongMaterial({
-  color: 0x888888, 
-  emissive: 0x222222,
-  emissiveMap: new
-THREE.TextureLoader().load('./asset/2k_moon.jpg'),
-  emissiveIntensity: 1,
+  map : textureLoader.load(moonColor),
+  bumpMap : textureLoader.load(moonBump),
+
+  bumpScale: 0.25,
+  shininess: 1
 
 })
 const moonMesh = new THREE.Mesh(Spheregeometry, moonMaterial);
