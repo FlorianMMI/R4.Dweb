@@ -31,6 +31,7 @@ let obj = {
   soleil: true,
   terre: true,
   lune: true,
+  eathorbit: true,
   grille: true,
   Vitesse: 0.01,
 };
@@ -43,6 +44,7 @@ gui.add(obj, "soleil")
 gui.add(obj, "terre")
 gui.add(obj, "lune")
 gui.add(obj, "grille")
+gui.add(obj, "eathorbit")
 
 
 
@@ -57,6 +59,12 @@ earthOrbit.position.x = 10;
 solarSystem.add(earthOrbit);
 objects.push(earthOrbit);
 
+const earthOrbitPath = new THREE.TorusGeometry(10, 0.1, 16, 100);
+const pathMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+const pathMesh = new THREE.Mesh(earthOrbitPath, pathMaterial);
+pathMesh.rotation.x = Math.PI / 2;
+scene.add(pathMesh);
+
 
 
 const Spheregeometry = new THREE.SphereGeometry(1, 32, 32);
@@ -64,7 +72,7 @@ const Sunmaterial = new THREE.MeshPhongMaterial({
   emissive: 0xFFFF00,
   emissiveMap: new
 THREE.TextureLoader().load('./asset/2k_sun.jpg'),
-emissiveIntensity: 1,
+emissiveIntensity: .7,
 });
 
 const sunMesh = new THREE.Mesh(Spheregeometry, Sunmaterial);
@@ -112,8 +120,6 @@ const moonMesh = new THREE.Mesh(Spheregeometry, moonMaterial);
 moonMesh.scale.set(0.5,0.5,0.5)
 moonOrbit.add(moonMesh);
 objects.push(moonMesh);
-
-
 
 
 
