@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm';
 import Stats from 'three/addons/libs/stats.module.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 
 const container = document.querySelector('.container');
 const stats = new Stats();
@@ -23,15 +25,23 @@ scene.background = new THREE.CubeTextureLoader()
 ])
 
 const gui = new GUI();
-gui.add (document, "title");
+// gui.add (document, "title");
 
-let box = new THREE.BoxGeometry(1.5, 3, 0.5);
-let boxMat = new THREE.MeshStandardMaterial({color: 0xa9a9a9});
-let boxMesh = new THREE.Mesh(box, boxMat);
-boxMesh.castShadow = true;
-boxMesh.receiveShadow = true;
-boxMesh.position.set(0, 2, 0);
-scene.add(boxMesh);
+
+const loader = new GLTFLoader();
+loader.load('./assets/Rocketship.glb', function (gltf) {
+  const model = gltf.scene;
+  
+  scene.add(gltf.scene);
+  model.traverse(function(node) {
+    if (node.isMesh) {
+      node.castShadow = true;
+      node.receiveShadow = true;
+    }
+  }) 
+});
+
+
 
 let sol = new THREE.PlaneGeometry(10, 10);
 let solMat = new THREE.MeshStandardMaterial({color: 0xd3d3d3});
@@ -50,9 +60,9 @@ light.castShadow = true;
 scene.add(light);
 scene.add(new THREE.DirectionalLightHelper(light));
 
-light.shadow.bias = -0.000001;
-light.shadow.mapSize.width = 8192;
-light.shadow.mapSize.height = 8192;
+light.shadow.bias = -0.0001;
+light.shadow.mapSize.width = 2048;
+light.shadow.mapSize.height = 2048;
 light.shadow.camera.near = 10;
 light.shadow.camera.far = 200;
 light.shadow.camera.left = 100;
@@ -96,7 +106,7 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 let temp = 0.01;
 const loop = () => {
-  boxMesh.rotation.y += temp;
+  
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(loop);
