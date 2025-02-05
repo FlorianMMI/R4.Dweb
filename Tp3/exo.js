@@ -26,15 +26,15 @@ const gui = new GUI();
 gui.add (document, "title");
 
 let box = new THREE.BoxGeometry(1.5, 3, 0.5);
-let boxMat = new THREE.MeshBasicMaterial({color: 0xa9a9a9});
+let boxMat = new THREE.MeshStandardMaterial({color: 0xa9a9a9});
 let boxMesh = new THREE.Mesh(box, boxMat);
 boxMesh.castShadow = true;
-boxMesh.receiveShadow = false;
+boxMesh.receiveShadow = true;
 boxMesh.position.set(0, 2, 0);
 scene.add(boxMesh);
 
 let sol = new THREE.PlaneGeometry(10, 10);
-let solMat = new THREE.MeshBasicMaterial({color: 0xd3d3d3});
+let solMat = new THREE.MeshStandardMaterial({color: 0xd3d3d3});
 let solMesh = new THREE.Mesh(sol, solMat);
 solMesh.receiveShadow = true;
 solMesh.rotateX(-Math.PI / 2); 
@@ -50,11 +50,15 @@ light.castShadow = true;
 scene.add(light);
 scene.add(new THREE.DirectionalLightHelper(light));
 
-
-light.shadow.mapSize.width = 512;
-light.shadow.mapSize.height = 512;
-light.shadow.camera.near = 0.5;
-light.shadow.camera.far = 500;
+light.shadow.bias = -0.001;
+light.shadow.mapSize.width = 2048;
+light.shadow.mapSize.height = 2048;
+light.shadow.camera.near = 50;
+light.shadow.camera.far = 150;
+light.shadow.camera.left = 100;
+light.shadow.camera.right = -100;
+light.shadow.camera.top = 100;
+light.shadow.camera.bottom = -100;
 
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
@@ -90,8 +94,9 @@ window.addEventListener('resize', () => {
 const controls = new OrbitControls(camera, canvas);
 
 controls.enableDamping = true;
-// let time = 0.01;
+let temp = 0.01;
 const loop = () => {
+  boxMesh.rotation.y += temp;
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(loop);
