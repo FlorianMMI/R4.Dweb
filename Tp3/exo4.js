@@ -28,22 +28,56 @@ const gui = new GUI();
 // gui.add (document, "title");
 
 
-const loader = new GLTFLoader();
-loader.load('./assets/Rocketship.glb', function (gltf) {
-  const model = gltf.scene;
-  model.name = "rocket";
-   scene.add(gltf.scene);
-  model.traverse(function(node) {
-    if (node.isMesh) {
-      node.castShadow = true;
-      node.receiveShadow = true;
-    }
-  }) 
-});
+// Groupe Principal
+let mainGroup = new THREE.Object3D();
+mainGroup.position.y = 30;
+scene.add(mainGroup);
+
+// Barre horizontal
+let cyl = new THREE.CylinderGeometry(1, 1, 1, 100, 100);
+let cylMat = new THREE.MeshPhongMaterial({ color: 0x808080});
+let cylMesh = new THREE.Mesh(cyl, cylMat);
+cylMesh.castShadow = true;
+cylMesh.receiveShadow = true;
+cylMesh.scale.set(3, 100, 3);
+cylMesh.rotateZ(Math.PI / 2);
+mainGroup.add(cylMesh);
+
+let sphGeomety = new THREE.SphereGeometry(5, 32, 32);
+// Toutes les pendules 
+let sensRotation = [];
+let groups = [];
+
+let hauteur = 10
+let vitesse = 2;
+for (let x = -40; x <= 40; x += 10) {
+
+  let group0 = new THREE.Object3D();
+  let cVertical = new THREE.Mesh(cyl, cylMat);
+  cVertical.scale.set(0.5, hauteur, 0.5);
+  cVertical.position.y = -hauteur/2;
+  cVertical.castShadow = true;
+  group0.add(cVertical);
+  let sph = new THREE.Mesh(sphGeomety, cylMat);
+  sph.position.y = -hauteur;
+  sph.castShadow = true;
+  group0.add(sph);
+  group0.rotation.x = Math.PI / 3;
+  group0.position.x = x;
+  mainGroup.add(group0);
+  groups.push(group0);
+  sensRotation.push(vitesse);
+  hauteur += 1;
+  vitesse *= 0.89;
+}
 
 
 
-let sol = new THREE.PlaneGeometry(10, 10);
+
+
+// mainGroup.add(groupe0);
+
+let sol = new THREE.PlaneGeometry(1000, 1000);
 let solMat = new THREE.MeshStandardMaterial({color: 0xd3d3d3});
 let solMesh = new THREE.Mesh(sol, solMat);
 solMesh.receiveShadow = true;
@@ -100,42 +134,25 @@ window.addEventListener('resize', () => {
 });
 
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-window.addEventListener('click', (event) => {
-  // Convert mouse position to normalized device coordinates (-1 to +1)
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-  // Check intersections with all objects in the scene (recursively)
-  const intersects = raycaster.intersectObjects(scene.children, true);
-
-  intersects.forEach((intersect) => {
-    let object = intersect.object;
-    // Traverse upward in case the clicked mesh is nested in several groups
-    while (object) {
-      if (object.name === 'rocket') {
-        console.log('Rocket clicked!');
-        object.position.y += 0.1;
-        if (object.position.y >= 10) {
-          object.position.y = 0;
-        }
-        
-      }
-      object = object.parent;
-    }
-  });
-});
-
+let go = false;
 
 const controls = new OrbitControls(camera, canvas);
 
 controls.enableDamping = true;
-let temp = 0.01;
+
 const loop = () => {
   
+  if (go){
+    for (let i = 0; i < groups.length; i++) {
+      groups[i].rotation.x += sensRotation[i] * 0.02;
+      if (groups[i].rotation.x > Math.PI / 3) {
+        sensRotation[i] *= -1;
+      }
+      if (groups[i].rotation.x < -Math.PI / 3) {
+        sensRotation[i] *= -1;
+      }
+    }
+  }
   
   controls.update();
   renderer.render(scene, camera);
@@ -145,3 +162,10 @@ const loop = () => {
 
 
 loop();
+
+
+
+window.addEventListener('keydown', (event) => {
+  go= true;
+
+});

@@ -28,22 +28,22 @@ const gui = new GUI();
 // gui.add (document, "title");
 
 
-const loader = new GLTFLoader();
-loader.load('./assets/Rocketship.glb', function (gltf) {
-  const model = gltf.scene;
-  model.name = "rocket";
-   scene.add(gltf.scene);
-  model.traverse(function(node) {
-    if (node.isMesh) {
-      node.castShadow = true;
-      node.receiveShadow = true;
-    }
-  }) 
-});
+for (let x = -8; x <= 9; x ++) {
+  for (let y = -8; y < 9; y++) {
+    let cpt = Math.random() * 8.0 + 2.0;
+    let box = new THREE.BoxGeometry(2, cpt, 2);
+    let boxMat = new THREE.MeshStandardMaterial({ color: 0xa9a9a9 });
+    let boxMesh = new THREE.Mesh(box, boxMat);
+    boxMesh.castShadow = true;
+    boxMesh.receiveShadow = true;
+    boxMesh.position.set(Math.random() + x * 5, cpt /2 + 5  , Math.random() + y * 5);
+    scene.add(boxMesh);
+  }
+}
 
 
 
-let sol = new THREE.PlaneGeometry(10, 10);
+let sol = new THREE.PlaneGeometry(1000, 1000);
 let solMat = new THREE.MeshStandardMaterial({color: 0xd3d3d3});
 let solMesh = new THREE.Mesh(sol, solMat);
 solMesh.receiveShadow = true;
