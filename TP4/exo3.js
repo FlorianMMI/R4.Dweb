@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import Stats from 'three/addons/libs/stats.module.js'
+import Bullet from './Bullet'
 
 const canvas = document.querySelector('.webgl')
 const scene = new THREE.Scene()
@@ -121,6 +122,7 @@ class Figure {
       armRotation: 0,
       HeadRotation: 0,
       leftEyeScale: 1,
+      walkRotation: 0,
       ...params
     }
     
@@ -153,6 +155,13 @@ class Figure {
     
     this.createLegs()
   }
+
+  // createBall(){
+  //   const geometry = new THREE.SphereGeometry(0.5, 32, 32)
+  //   const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+  //   const sphere = new THREE.Mesh(geometry, material)
+     
+  // }
   
   createHead() {
     // Create a new group for the head
@@ -224,12 +233,15 @@ class Figure {
     const legs = new THREE.Group()
     const geometry = new THREE.BoxGeometry(0.25, 0.4, 0.25)
     
+    this.legs = []
+    
     for(let i = 0; i < 2; i++) {
       const leg = new THREE.Mesh(geometry, this.headMaterial)
       leg.castShadow = true
       const m = i % 2 === 0 ? 1 : -1
       legs.add(leg)
       leg.position.x = m * 0.22
+      this.legs.push(leg)
     }
     
     legs.position.y = -1.15
@@ -256,16 +268,26 @@ class Figure {
     this.head.add(antennas)
   }
 
-  bounce() {
-    this.group.rotation.y = this.params.ry
-    this.group.position.y = this.params.y
+  update() {
+    this.group.rotation.y = this.params.ry;
+    this.group.position.y = this.params.y;
+    this.group.position.x = this.params.x;
+    this.group.position.z = this.params.z;
+    
+    
     this.arms.forEach((arm, index) => {
       const m = index % 2 === 0 ? 1 : -1
       arm.rotation.z = this.params.armRotation * m
+      arm.rotation.x = this.params.walkRotation * m
+    })
+
+    this.legs.forEach((leg, index) => {
+      const m = index % 2 === 0 ? 1 : -1
+      leg.rotation.x = this.params.walkRotation * m
     })
 
     // rotation de la tête 
-    this.head.rotation.y = this.params.HeadRotation
+    this.head.rotation.z = this.params.HeadRotation
     this.leftEye.scale.set(
       this.params.leftEyeScale,
       this.params.leftEyeScale,
@@ -285,26 +307,77 @@ figure.init()
 
 // Timeline pour le saut 
 
-let rySpeed = 0;  
+let rySpeed = 0;
+
+
+
+let walkSpeed = 0;
+
+
+let walkTl = gsap.timeline();
+walkTl.to(figure.params, {
+  walkRotation: degreesToRadians(45),
+  repeat: 1,
+  yoyo: true,
+  duration: 0.25,
+
+})
+
+walkTl.to(figure.params, {
+  walkRotation: degreesToRadians(-45),
+  repeat: 1,
+  yoyo: true,
+  duration: 0.25,}, ">");
+walkTl.pause()
+
+
+document.addEventListener('keydown', (event) => {
+  if (event.key == 'ArrowUp') {
+    walkSpeed += 0.1
+  }
+  if (event.key == 'ArrowDown') {
+    walkSpeed -= 0.1
+  }
+  if (event.key == 'ArrowUp' || event.key == 'ArrowDown') {
+    if (!walkTl.isActive()) {
+      idelTl.pause();
+      walkTl.restart()
+    } 
+  }
+});
+
 let jumpTl = gsap.timeline()
 document.addEventListener('keydown', (event) => {
+
+
   if ((event.key == ' ') && (!jumpTl.isActive())) {
+    idelTl.pause(0);
     jumpTl.to(figure.params, {
       y: 3,
       armRotation: degreesToRadians(90),
       repeat: 1,
       yoyo: true,
-      duration: 0.5
+      duration: 0.5,
+      ease: CustomEase.create("custom", "M0,0 C0.126,0.382 0.459,0.372 0.617,0.52 0.809,0.7 0.818,1.001 1,1 "),
     });
   }
 
   if (event.key == 'ArrowRight') {
+    idelTl.pause(0);
     rySpeed -= 0.15
   } else if (event.key == 'ArrowLeft') {
+    idelTl.pause(0);
     rySpeed += 0.15
   }
+
+  
+
   
 });
+
+
+let bullet = new Bullet();
+
 
 
 
@@ -313,13 +386,16 @@ idelTl.to(figure.params, {
   HeadRotation: Math.PI / 3,
   repeat: -1,
   yoyo: true,
-  duration: 0.6
+  duration: 0.6,
+  ease : "back.out"
 })
 idelTl.to(figure.params, {
   leftEyeScale: 0.5,
   repeat: -1,
   yoyo: true,
-  duration: 0.6
+  duration: 0.6,
+  ease : "elsatic.in"
+  
 })
 
 gsap.set(figure.params, {
@@ -338,9 +414,17 @@ gsap.ticker.add(() => {
   figure.params.ry += rySpeed;
   rySpeed *= 0.93;
 
-  
-  figure.bounce()
+  walkSpeed *= 0.97;
+  figure.params.x += walkSpeed * Math.sin(figure.params.ry);
+  figure.params.z += walkSpeed * Math.cos(figure.params.ry);
+
+  if (!jumpTl.isActive() && !idelTl.isActive()) {
+    idelTl.restart()
+  }
+  figure.update()
   controls.update()
+  bullet.update()
   render()
   stats.update()
+
 })
